@@ -1,10 +1,6 @@
 import { createCanvas, loadImage } from "canvas";
 import * as fs from "fs";
 import * as fastcsv from "fast-csv";
-import { Chart, registerables } from "chart.js";
-
-// Register the necessary chart types
-Chart.register(...registerables);
 
 // Parse CSV file to extract merged data
 async function parseCsv(filename: string, delimiter: string) {
