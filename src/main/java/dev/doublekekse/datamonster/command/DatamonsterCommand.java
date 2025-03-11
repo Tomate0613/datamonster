@@ -24,7 +24,7 @@ public class DatamonsterCommand {
 
                             ctx.getSource().sendFeedback(Component.literal("Exported table " + table.name));
                         } catch (Exception ignored) {
-                            ctx.getSource().sendFeedback(Component.literal("Failed to export table " + table.name));
+                            ctx.getSource().sendError(Component.literal("Failed to export table " + table.name));
                         }
                     }
 

@@ -19,6 +19,18 @@ repositories {
     flatDir {
         dirs 'libs'
     }
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -31,7 +43,9 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 
-    modCompileOnly 'net.modfest:scattered-shards:1.7.2+1.21'
+    modCompileOnly 'net.modfest:scattered-shards:1.8.0+1.21'
+    //modCompileOnly 'maven.modrinth:area_lib:0.0.4'
+    modCompileOnly 'maven.modrinth:area_lib:0.2.6'
 }
 
 processResources {
