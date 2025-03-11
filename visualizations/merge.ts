@@ -1,19 +1,8 @@
-import fs from "fs";
-import * as fastcsv from "fast-csv";
 import Fuse from "fuse.js";
 import inquirer from "inquirer";
+import {exportToCsv, getModfest, getShards, Merged, ModfestEntry, Shard,} from "./csv";
 
-async function parseCsv(filename: string, delimiter: string) {
-  return new Promise((resolve) => {
-    const results: any[] = [];
-    fs.createReadStream(filename)
-      .pipe(fastcsv.parse({ headers: true, delimiter }))
-      .on("data", (row) => results.push(row))
-      .on("end", () => resolve(results));
-  });
-}
-
-async function findBestMatch<T>(
+async function findMatches<T>(
   modName: string,
   shardData: T[],
   threshold: number,
@@ -23,15 +12,12 @@ async function findBestMatch<T>(
   return results.map((result) => result.item);
 }
 
-type Shard = { id: string; collected: string };
-
-function compareFunc(max: Shard, shard: Shard) {
+function compareShards(max: Shard, shard: Shard) {
   return +shard.collected > +max.collected ? shard : max;
 }
 
 function filterOptions(
   possibleMatches: Shard[],
-  shard: any,
   showAllOption: boolean,
 ) {
   // Group by `id`
@@ -43,14 +29,11 @@ function filterOptions(
       acc[match.id].push(match);
       return acc;
     },
-    {} as Record<string, any[]>,
+    {} as Record<string, Shard[]>,
   );
 
   // For each group of `id`, select the one with the highest `collected`
-  const highestCollectedMatches = Object.values(groupedById).map((group) => {
-    const bestMatch = group.reduce(compareFunc);
-    return bestMatch;
-  });
+  const highestCollectedMatches = Object.values(groupedById).map((group) => group.reduce(compareShards));
 
   // Create the choices list with the option to select from the whole list
   const choices = highestCollectedMatches.map((match) => {
@@ -73,19 +56,15 @@ function filterOptions(
   return choices;
 }
 
-async function mergeCsvs(
-  mf: { Mod: string }[],
-  shard: { id: string; collected: string }[],
-) {
-  const mergedData: any[] = [];
+async function mergeCsvs(mf: ModfestEntry[], shard: Shard[]) {
+  const mergedData: Merged[] = [];
 
-  for (const mod of mf) {
-    const modName = mod.Mod;
-    const matchingShards = await findBestMatch(modName, shard, 0.3);
+  for (const entry of mf) {
+    const modName = entry.Mod;
+    const matchingShards = await findMatches(modName, shard, 0.3);
 
-    // If no exact match found, use fuzzy matching
     if (matchingShards.length === 0) {
-      let possibleMatches = await findBestMatch(modName, shard, 0.7);
+      let possibleMatches = await findMatches(modName, shard, 0.7);
 
       if (possibleMatches.length === 0) {
         console.log(`No match found for Mod: ${modName}`);
@@ -98,69 +77,50 @@ async function mergeCsvs(
           type: "list",
           name: "shardId",
           message: `Could not find an exact match for Mod: ${modName}. Please select the closest match:`,
-          choices: filterOptions(possibleMatches, shard, true),
+          choices: filterOptions(possibleMatches, true),
         },
       ]);
 
       if (selectedShard.shardId === "fullList") {
-        possibleMatches = await findBestMatch(modName, shard, 1);
+        possibleMatches = await findMatches(modName, shard, 1);
 
         const fullListSelection = await inquirer.prompt([
           {
             type: "list",
             name: "shardId",
             message: "Please choose from the full list of possible matches:",
-            choices: filterOptions(possibleMatches, shard, false),
+            choices: filterOptions(possibleMatches, false),
           },
         ]);
-        selectedShard.shardId = fullListSelection.shardId; // Update selected shard id with the user's choice
+        selectedShard.shardId = fullListSelection.shardId;
       }
 
       // Find the selected shard from the list
       const shardRow = possibleMatches
         .filter((match) => match.id === selectedShard.shardId)
-        .reduce(compareFunc);
+        .reduce(compareShards);
       if (shardRow) {
-        mergedData.push({ ...mod, ...shardRow });
+        mergedData.push({ ...entry, ...shardRow });
       }
     } else {
-      // If an exact match is found, select the one with the largest `collected` value
-      const bestShard = matchingShards.reduce(compareFunc);
+      const bestShard = matchingShards.reduce(compareShards);
 
-      //console.log("Choose", bestShard.id, "for", mod.Mod)
-
-      mergedData.push({ ...mod, ...bestShard });
+      mergedData.push({ ...entry, ...bestShard });
     }
   }
 
   return mergedData;
 }
 
-async function exportToCsv(mergedData: any[], outputFilename: string) {
-  const writeStream = fs.createWriteStream(outputFilename);
-  const csvStream = fastcsv.format({ headers: true, quote: '"' });
-
-  csvStream.pipe(writeStream);
-
-  mergedData.forEach((row) => {
-    csvStream.write(row);
-  });
-
-  csvStream.end();
-  console.log(`Merged data successfully exported to ${outputFilename}`);
-}
-
 async function run() {
-  const mf = (await parseCsv("mf.CSV", ";")) as { Mod: string }[];
-  const shard = (await parseCsv("shard.csv", ",")) as {
-    id: string;
-    collected: string;
-  }[];
+  const mf = await getModfest();
+  const shards = await getShards();
 
   console.log("Merging data...");
-  const merged = await mergeCsvs(mf, shard);
+  const merged = await mergeCsvs(mf, shards);
 
   exportToCsv(merged, "merged.csv");
+  console.log(`Merged data successfully exported to merged.csv`);
 }
 
 run();
