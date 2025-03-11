@@ -19,9 +19,7 @@ public class ScatteredShardsTableProvider {
             return Integer.toString(progress);
         });
 
-        ScatteredShardsAPI.getClientLibrary().shards().forEach((shardId, shard) -> {
-            shardTable.addDataRow(shard);
-        });
+        ScatteredShardsAPI.getClientLibrary().shards().forEach((shardId, shard) -> shardTable.addDataRow(shard));
 
         return shardTable;
     }
