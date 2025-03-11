@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class ModTableProvider {
     public static Table<?> getTable() {
-        var table = new Table<ModContainer>("Mods");
+        var table = new Table<ModContainer>("Mod");
 
         table.addColumn("id", mod -> mod.getMetadata().getId());
         table.addColumn("name", mod -> mod.getMetadata().getName());
