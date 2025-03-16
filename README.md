@@ -8,7 +8,7 @@
 
 ### Input
 
-- `mf.CSV` Expects at least (Mod, X, Z, wX, wZ) separated by ;
+- `mf.CSV` Expects at least (Mod, X, Z, wX, wZ)
 - `shard.csv` Export from datamonster
 - `background.png`
 - minX, maxX, minZ, maxZ in `render.ts` (Currently hardcoded in `run` method)
