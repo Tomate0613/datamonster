@@ -6,14 +6,27 @@
 
 ## Visualizations
 
-### Input
+### Shards
+
+#### Input
 
 - `mf.CSV` Expects at least (Mod, X, Z, wX, wZ)
 - `shard.csv` Export from datamonster
 - `background.png`
 - minX, maxX, minZ, maxZ in `render.ts` (Currently hardcoded in `run` method)
 
-### Usage
+#### Usage
 - `pnpm i`
 - `pnpm merge` to merge the csv files into `merged.csv`
-- `pnpm render` to render the shard distribution
+- `pnpm shards` to render
+
+### Performance
+
+#### Input
+- `performance.csv` Export from datamonster
+- `background.png`
+- minX, maxX, minZ, maxZ in `render.ts` (Currently hardcoded in `run` method)
+
+#### Usage
+- `pnpm i`
+- `pnpm performance` to render

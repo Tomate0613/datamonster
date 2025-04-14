@@ -122,8 +122,6 @@ visualizations/node_modules/
 visualizations/dist/
 
 # Visualization data
-visualizations/background*.png
-visualizations/shards*.png
-visualizations/mf*.CSV
-visualizations/shard*.csv
-visualizations/merged*.csv
+visualizations/*.png
+visualizations/*.CSV
+visualizations/*.csv
