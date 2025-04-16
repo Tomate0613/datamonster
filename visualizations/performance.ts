@@ -22,7 +22,7 @@ async function renderChartToPNG(
   const minTime = Math.min(...times);
   const maxTime = Math.max(...times);
 
-  function getColorForRenderTime(renderTime: number): string {
+  function getColor(renderTime: number): string {
     const t = (renderTime - minTime) / (maxTime - minTime);
 
     let r = 0;
@@ -45,7 +45,7 @@ async function renderChartToPNG(
   }
 
   for (const point of data) {
-    const color = getColorForRenderTime(+point.avgRenderTimeMs);
+    const color = getColor(+point.avgRenderTimeMs);
 
     const x = +point.x - fromX;
     const z = +point.z - fromZ;
