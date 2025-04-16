@@ -76,7 +76,7 @@ async function run() {
   const data = await getPerformance();
 
   const outputFilename = "performance.png";
-  await renderChartToPNG(data, outputFilename, -512, -512, 1023, 1023);
+  await renderChartToPNG(data.filter(point => +point.totalSamples > 20), outputFilename, -512, -512, 1023, 1023);
 }
 
 run().catch((error) => console.error("Error:", error));
