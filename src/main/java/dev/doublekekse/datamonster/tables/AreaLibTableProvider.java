@@ -8,7 +8,6 @@ import net.minecraft.world.phys.AABB;
 
 import java.util.function.Function;
 
-
 public class AreaLibTableProvider {
     public static Table<?> getTable() {
         var table = new Table<Area>("Area");

@@ -5,8 +5,10 @@
   "main": "merge.js",
   "scripts": {
     "merge": "tsc && node dist/merge.js",
+    "mappings": "tsc && node dist/mappings.js",
     "shards": "tsc && node dist/shards.js",
-    "performance": "tsc && node dist/performance.js"
+    "performance": "tsc && node dist/performance.js",
+    "items": "tsc && node dist/items.js"
   },
   "keywords": [],
   "author": "Tomate0613",

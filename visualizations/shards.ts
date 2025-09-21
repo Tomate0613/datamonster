@@ -1,6 +1,7 @@
 import { getMerged, type Merged } from "./csv";
 import fs from "fs";
-import { mapCanvas } from "./map";
+import { getColor, mapCanvas } from "./map";
+import { mean, median } from "./math";
 
 async function renderChartToPNG(
   data: Merged[],
@@ -9,35 +10,65 @@ async function renderChartToPNG(
   fromZ: number,
   toX: number,
   toZ: number,
+  showNames: boolean = true,
 ) {
-  const { ctx, canvas } = await mapCanvas(fromX, fromZ, toX, toZ);
+  const scale = 2;
+  const { ctx, canvas } = await mapCanvas(fromX, fromZ, toX, toZ, scale);
 
-  ctx.fillStyle = "rgba(255, 99, 132, 0.5)";
-  ctx.strokeStyle = "rgba(255, 99, 132, 1)";
   ctx.lineWidth = 2;
 
-  data.forEach((point) => {
-    const radius = +point.collected * 0.3;
+  const collected = data.map((p) => +p.collected);
+  const minCollected = Math.min(...collected);
+  const maxCollected = Math.max(...collected);
+  const colors = ["r", "g", "b"] as const;
 
-    const x = 0.5 * (+point.X + +point.wX) - fromX;
-    const z = 0.5 * (+point.Z + +point.wZ) - fromZ;
+  console.log(minCollected, maxCollected);
+  console.log(mean(collected));
+  console.log(median(collected));
 
-    ctx.fillStyle = "rgba(255, 99, 132, 0.5)";
+  data
+    .sort((a, b) => +b.collected - +a.collected)
+    .forEach((point) => {
+      // const radius = +point.collected * 0.1;
+      const radius = 30;
 
-    ctx.beginPath();
-    ctx.arc(x, z, radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+      const x = (0.5 * (+point.X + +point.wX) - fromX) * scale;
+      const z = (0.5 * (+point.Z + +point.wZ) - fromZ) * scale;
 
-    ctx.fillStyle = "black";
+      ctx.fillStyle = getColor(
+        minCollected,
+        maxCollected,
+        +point.collected,
+        colors,
+        0.5,
+      );
+      ctx.strokeStyle = getColor(
+        minCollected,
+        maxCollected,
+        +point.collected,
+        colors,
+        0.9,
+      );
 
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+      ctx.beginPath();
+      ctx.arc(x, z, radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
 
-    const text = point.Mod + " (" + point.collected + ")";
+      ctx.fillStyle = "black";
 
-    ctx.fillText(text, x, z);
-  });
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      // const text = point.collected;
+
+      if (showNames) {
+        ctx.fillText(point.collected, x, z + 5);
+        ctx.fillText(point.name, x, z - 5);
+      } else {
+        ctx.fillText(point.collected, x, z);
+      }
+    });
 
   const buffer = canvas.toBuffer("image/png");
   fs.writeFileSync(outputFilename, buffer);
