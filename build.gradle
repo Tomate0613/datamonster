@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.7.4'
+    id 'fabric-loom' version '1.10.1'
     id 'maven-publish'
 }
 
@@ -43,9 +43,9 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 
-    modCompileOnly 'net.modfest:scattered-shards:1.8.0+1.21'
+    modCompileOnly "maven.modrinth:scattered-shards:${project.scattered_shards_version}"
+    modCompileOnly "maven.modrinth:area_lib:${project.area_lib_version}"
     //modCompileOnly 'maven.modrinth:area_lib:0.0.4'
-    modCompileOnly 'maven.modrinth:area_lib:0.2.6'
 }
 
 processResources {

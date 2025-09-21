@@ -16,9 +16,9 @@ public class ItemsTableProvider {
         table.addColumn("namespace", item -> item.getA().getNamespace());
         table.addColumn("path", item -> item.getA().getPath());
 
-        table.addColumn("name", item -> item.getB().getDescription().getString());
+        table.addColumn("name", item -> item.getB().getName().getString());
         table.addColumn("name_has_translation", item -> {
-            var desc = item.getB().getDescription();
+            var desc = item.getB().getName();
 
             if (desc instanceof TranslatableContents component) {
                 return String.valueOf(!component.getKey().equals(desc.getString()));
