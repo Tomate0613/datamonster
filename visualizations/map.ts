@@ -16,7 +16,7 @@ export async function mapCanvas(
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-  const backgroundImage = await loadImage("background.png");
+  const backgroundImage = await loadImage("data/background.png");
 
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(backgroundImage, 0, 0, canvasWidth, canvasHeight);
@@ -54,5 +54,3 @@ export function getColor(
 
   return `rgba(${c.r},${c.g},${c.b},${transparency})`;
 }
-
-console.log(getColor(0, 1, 1, ["r", "g", "b"], 1));

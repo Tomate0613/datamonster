@@ -1,6 +1,7 @@
 import { getPerformance, type Performance } from "./csv";
 import fs from "fs";
 import { mapCanvas } from "./map";
+import { mapInfo } from "./data/data";
 
 const GRID_SIZE = 16;
 
@@ -75,8 +76,8 @@ async function renderChartToPNG(
 async function run() {
   const data = await getPerformance();
 
-  const outputFilename = "performance.png";
-  await renderChartToPNG(data.filter(point => +point.totalSamples > 20), outputFilename, -512, -512, 1023, 1023);
+  const outputFilename = "out/performance.png";
+  await renderChartToPNG(data.filter(point => +point.totalSamples > 20), outputFilename, mapInfo.minX, mapInfo.minZ, mapInfo.maxX, mapInfo.maxZ);
 }
 
 run().catch((error) => console.error("Error:", error));
