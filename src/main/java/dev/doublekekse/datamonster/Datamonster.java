@@ -7,9 +7,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,7 @@ public class Datamonster implements ModInitializer {
             tables.add(RegistryTableProvider.getTable(key, registry));
         });
 
-        tables.add(RegistryTableProvider.getTable(ResourceLocation.withDefaultNamespace("registry"), BuiltInRegistries.REGISTRY));
+        tables.add(RegistryTableProvider.getTable(Identifier.withDefaultNamespace("registry"), BuiltInRegistries.REGISTRY));
 
         if (FabricLoader.getInstance().isModLoaded("scattered_shards")) {
             tables.add(ScatteredShardsTableProvider.getTable());

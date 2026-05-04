@@ -120,6 +120,8 @@ run/
 visualizations/.vs/
 visualizations/node_modules/
 visualizations/dist/
+visualizations/data/
+visualizations/old/
 
 # Visualization data
 visualizations/*.png
