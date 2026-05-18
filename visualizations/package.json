@@ -5,6 +5,7 @@
   "main": "merge.js",
   "scripts": {
     "shards": "tsc && node dist/shards.js",
+    "areas": "tsc && node dist/areas.js",
     "performance": "tsc && node dist/performance.js",
     "items": "tsc && node dist/items.js"
   },

@@ -21,10 +21,6 @@ function title(...args: any[]) {
   console.log(`\x1b[34m\x1b[1m${placeholders}\x1b[0m`, ...args);
 }
 
-function green(string: string) {
-  return `\x1b[32m${string}\x1b[0m`;
-}
-
 async function renderAll() {
   const shards = await getShards();
   title("All");
@@ -82,7 +78,7 @@ async function render(
   showNames: boolean,
   scale: number,
 ) {
-  const { ctx, canvas } = await mapCanvas(
+  const { ctx, save, transformPosition } = await mapCanvas(
     mapInfo.minX,
     mapInfo.minZ,
     mapInfo.maxX,
@@ -102,8 +98,10 @@ async function render(
     .forEach(({ submission, shard }) => {
       const radius = 30;
 
-      const x = (submission.booth_data!.marker_pos.x - mapInfo.minX) * scale;
-      const z = (submission.booth_data!.marker_pos.z - mapInfo.minZ) * scale;
+      const [x, z] = transformPosition(
+        submission.booth_data!.marker_pos.x,
+        submission.booth_data!.marker_pos.z,
+      );
 
       ctx.fillStyle = getColor(
         minCollected,
@@ -138,9 +136,7 @@ async function render(
       }
     });
 
-  const buffer = canvas.toBuffer("image/png");
-  fs.writeFileSync(outputFilename, buffer);
-  console.log(`Saved as ${green(outputFilename)}`);
+  save(outputFilename);
 }
 
 async function run() {

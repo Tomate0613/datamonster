@@ -1,4 +1,6 @@
 import { createCanvas, loadImage } from "canvas";
+import fs from "node:fs";
+import { green } from "./color";
 
 export async function mapCanvas(
   fromX: number,
@@ -21,7 +23,29 @@ export async function mapCanvas(
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(backgroundImage, 0, 0, canvasWidth, canvasHeight);
 
-  return { canvas, ctx };
+  function transformScale(dx: number, dy: number): [number, number];
+  function transformScale(d: number): number;
+  function transformScale(x: number, z?: number) {
+    if (z !== undefined) {
+      return [x * scale, z * scale] as const;
+    }
+
+    return x * scale;
+  }
+
+  return {
+    canvas,
+    ctx,
+    transformPosition(x: number, z: number) {
+      return [(x - fromX) * scale, (z - fromZ) * scale] as const;
+    },
+    transformScale,
+    save(filename: string) {
+      const buffer = canvas.toBuffer("image/png");
+      fs.writeFileSync(filename, buffer);
+      console.log(`Saved as ${green(filename)}`);
+    },
+  };
 }
 
 type Color = "r" | "g" | "b";

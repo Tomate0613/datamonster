@@ -1,5 +1,4 @@
 import { getPerformance, type Performance } from "./csv";
-import fs from "fs";
 import { mapCanvas } from "./map";
 import { mapInfo } from "./data/data";
 
@@ -13,7 +12,8 @@ async function renderChartToPNG(
   toX: number,
   toZ: number,
 ) {
-  const { ctx, canvas } = await mapCanvas(fromX, fromZ, toX, toZ);
+  const { ctx, transformPosition, transformScale, save } =
+    await mapCanvas(fromX, fromZ, toX, toZ);
 
   ctx.fillStyle = "rgba(255, 99, 132, 0.5)";
   ctx.strokeStyle = "rgba(255, 99, 132, 1)";
@@ -48,13 +48,13 @@ async function renderChartToPNG(
   for (const point of data) {
     const color = getColor(+point.avgRenderTimeMs);
 
-    const x = +point.x - fromX;
-    const z = +point.z - fromZ;
+    const [x, z] = transformPosition(+point.x, +point.z);
+    const sideLength = transformScale(GRID_SIZE);
 
     ctx.fillStyle = color;
 
     ctx.beginPath();
-    ctx.rect(x, z, GRID_SIZE, GRID_SIZE);
+    ctx.rect(x, z, sideLength, sideLength);
     ctx.fill();
 
     ctx.fillStyle = "black";
@@ -65,19 +65,24 @@ async function renderChartToPNG(
 
     const text = "" + Math.round(+point.avgRenderTimeMs);
 
-    ctx.fillText(text, x + GRID_SIZE / 2, z + GRID_SIZE / 2);
+    ctx.fillText(text, x + sideLength / 2, z + sideLength / 2);
   }
 
-  const buffer = canvas.toBuffer("image/png");
-  fs.writeFileSync(outputFilename, buffer);
-  console.log(`Chart saved as ${outputFilename}`);
+  save(outputFilename);
 }
 
 async function run() {
   const data = await getPerformance();
 
   const outputFilename = "out/performance.png";
-  await renderChartToPNG(data.filter(point => +point.totalSamples > 20), outputFilename, mapInfo.minX, mapInfo.minZ, mapInfo.maxX, mapInfo.maxZ);
+  await renderChartToPNG(
+    data.filter((point) => +point.totalSamples > 20),
+    outputFilename,
+    mapInfo.minX,
+    mapInfo.minZ,
+    mapInfo.maxX,
+    mapInfo.maxZ,
+  );
 }
 
 run().catch((error) => console.error("Error:", error));
