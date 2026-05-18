@@ -22,7 +22,7 @@ function title(...args: any[]) {
 }
 
 function green(string: string) {
-  return `\x1b[32m${string}\x1b[0m`
+  return `\x1b[32m${string}\x1b[0m`;
 }
 
 async function renderAll() {
@@ -34,6 +34,12 @@ async function renderAll() {
   const mergedMax = submissions.map((submission) => {
     modIds.push(submission.mod_id);
     const modShards = shards.filter((shard) => shard.id == submission.mod_id);
+
+    if (!modShards.length) {
+      console.warn(`Mod ${submission.id} has no shards`);
+      return { submission };
+    }
+
     const shard = modShards.reduce((max, obj) =>
       +obj.collected > +max.collected ? obj : max,
     );
@@ -42,9 +48,15 @@ async function renderAll() {
 
   const mergedMin = submissions.map((submission) => {
     const modShards = shards.filter((shard) => shard.id == submission.mod_id);
+
+    if (!modShards.length) {
+      return { submission };
+    }
+
     const shard = modShards.reduce((min, obj) =>
       +obj.collected < +min.collected ? obj : min,
     );
+
     return { submission, shard };
   });
 
@@ -65,7 +77,7 @@ async function renderAll() {
 type Submission = (typeof submissions)[number];
 
 async function render(
-  merged: { shard: Shard; submission: Submission }[],
+  merged: { shard?: Shard; submission: Submission }[],
   outputFilename: string,
   showNames: boolean,
   scale: number,
@@ -81,12 +93,12 @@ async function render(
   ctx.lineWidth = 2;
   const colors = ["r", "g", "b"] as const;
   const { minCollected, maxCollected } = stats(
-    merged.map((p) => +p.shard.collected),
+    merged.map((p) => +(p.shard?.collected || 0)),
   );
 
   merged
-    .sort((a, b) => +b.shard.collected - +a.shard.collected)
-    .filter(e => !!e.submission.booth_data)
+    .sort((a, b) => +(b.shard?.collected || 0) - +(a.shard?.collected || 0))
+    .filter((e) => !!e.submission.booth_data && !!e.shard)
     .forEach(({ submission, shard }) => {
       const radius = 30;
 
@@ -96,14 +108,14 @@ async function render(
       ctx.fillStyle = getColor(
         minCollected,
         maxCollected,
-        +shard.collected,
+        +shard!.collected,
         colors,
         0.5,
       );
       ctx.strokeStyle = getColor(
         minCollected,
         maxCollected,
-        +shard.collected,
+        +shard!.collected,
         colors,
         0.5,
       );
@@ -119,10 +131,10 @@ async function render(
       ctx.textBaseline = "middle";
 
       if (showNames) {
-        ctx.fillText(shard.collected, x, z + 5);
+        ctx.fillText(shard!.collected, x, z + 5);
         ctx.fillText(submission.name, x, z - 5);
       } else {
-        ctx.fillText(shard.collected, x, z);
+        ctx.fillText(shard!.collected, x, z);
       }
     });
 
