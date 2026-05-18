@@ -86,11 +86,12 @@ async function render(
 
   merged
     .sort((a, b) => +b.shard.collected - +a.shard.collected)
+    .filter(e => !!e.submission.booth_data)
     .forEach(({ submission, shard }) => {
       const radius = 30;
 
-      const x = (submission.booth_data.marker_pos.x - mapInfo.minX) * scale;
-      const z = (submission.booth_data.marker_pos.z - mapInfo.minZ) * scale;
+      const x = (submission.booth_data!.marker_pos.x - mapInfo.minX) * scale;
+      const z = (submission.booth_data!.marker_pos.z - mapInfo.minZ) * scale;
 
       ctx.fillStyle = getColor(
         minCollected,
