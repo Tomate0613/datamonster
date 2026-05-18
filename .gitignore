@@ -121,6 +121,7 @@ visualizations/.vs/
 visualizations/node_modules/
 visualizations/dist/
 visualizations/data/
+visualizations/data_*/
 visualizations/old/
 
 # Visualization data
